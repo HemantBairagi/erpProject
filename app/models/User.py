@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from sqlalchemy import (
-    Column, String, Boolean,DateTime,
-    Integer
+    Column, Index, String, Boolean,DateTime,
+    Integer,CheckConstraint , Enum as SQLEnum
 )
 from sqlalchemy.dialects.postgresql import JSON
+from app.models.EmunType import UserRole
 from app.models.base import BaseModel
+from sqlalchemy.orm import relationship
 class User(BaseModel):
     __tablename__ = "users"
 
@@ -14,7 +16,7 @@ class User(BaseModel):
     password_hash = Column(String(255))  
     
     # Role & Status
-    # role = Column(SQLEnum(UserRole), nullable=False, index=True)
+    role = Column(SQLEnum(UserRole), nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False, index=True)
     is_superuser = Column(Boolean, default=False, nullable=False)
     
@@ -37,12 +39,12 @@ class User(BaseModel):
     preferences = Column(JSON, default={})
     
     # Relationships
-    # employee_profile = relationship("Employee", back_populates="user", uselist=False)
-    # created_sales = relationship("Sale", back_populates="creator", foreign_keys="Sale.created_by")
+    employee_profile = relationship("Employee", back_populates="user", uselist=False)
+    created_sales = relationship("Sale", back_populates="creator", foreign_keys="Sale.created_by")
     # assigned_leads = relationship("Lead", back_populates="sales_rep", foreign_keys="Lead.assigned_to")
     # assigned_tickets = relationship("Ticket", back_populates="assignee", foreign_keys="Ticket.assigned_to")
     
-    # __table_args__ = (
-    #     CheckConstraint("failed_login_attempts >= 0", name="ck_user_failed_attempts"),
-    #     Index("idx_users_active_role", "is_active", "role"),
-    # )
+    __table_args__ = (
+        CheckConstraint("failed_login_attempts >= 0", name="ck_user_failed_attempts"),
+        Index("idx_users_active_role", "is_active", "role"),
+    )
